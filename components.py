@@ -44,25 +44,25 @@ def render_header(info: dict):
                  "SELL": "badge-red", "STRONG SELL": "badge-red"}.get(rec, "badge-blue")
 
     st.markdown(textwrap.dedent(f"""
-    <div class="glass-card" style="background: linear-gradient(135deg, {COLORS['gradient_start']}cc 0%, {COLORS['bg_card']} 100%); padding: 2rem;">
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem;">
-        <div>
-          <div class="hero-ticker">{info.get('ticker','')}</div>
-          <div class="hero-name">{info.get('name','')}</div>
-          <div style="margin-top:0.6rem; display:flex; gap:0.5rem; flex-wrap:wrap;">
-            <span class="score-badge badge-blue">{info.get('sector','N/A')}</span>
-            <span class="score-badge" style="background:rgba(255,255,255,0.07);color:{COLORS['text_secondary']};border:1px solid {COLORS['border']}">{info.get('country','N/A')} · {info.get('exchange','')}</span>
-            {f'<span class="score-badge {rec_badge}">{rec}</span>' if rec and rec != "N/A" else ""}
-          </div>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-size:2.2rem; font-weight:800; color:{COLORS['text_primary']};">{currency} {f"{price:,.2f}" if price else "N/A"}</div>
-          <div style="font-size:1rem; color:{change_color}; font-weight:600;">{change_arrow} {abs(pct_change) if pct_change is not None else 0.00:.2f}% today</div>
-          <div style="font-size:0.8rem; color:{COLORS['text_secondary']}; margin-top:0.4rem;">Mkt Cap: {mktcap_str}</div>
-        </div>
+<div class="glass-card" style="background: linear-gradient(135deg, {COLORS['gradient_start']}cc 0%, {COLORS['bg_card']} 100%); padding: 2rem;">
+  <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem;">
+    <div>
+      <div class="hero-ticker">{info.get('ticker','')}</div>
+      <div class="hero-name">{info.get('name','')}</div>
+      <div style="margin-top:0.6rem; display:flex; gap:0.5rem; flex-wrap:wrap;">
+        <span class="score-badge badge-blue">{info.get('sector','N/A')}</span>
+        <span class="score-badge" style="background:rgba(255,255,255,0.07);color:{COLORS['text_secondary']};border:1px solid {COLORS['border']}">{info.get('country','N/A')} · {info.get('exchange','')}</span>
+        {f'<span class="score-badge {rec_badge}">{rec}</span>' if rec and rec != "N/A" else ""}
       </div>
     </div>
-    """), unsafe_allow_html=True)
+    <div style="text-align:right;">
+      <div style="font-size:2.2rem; font-weight:800; color:{COLORS['text_primary']};">{currency} {f"{price:,.2f}" if price else "N/A"}</div>
+      <div style="font-size:1rem; color:{change_color}; font-weight:600;">{change_arrow} {abs(pct_change) if pct_change is not None else 0.00:.2f}% today</div>
+      <div style="font-size:0.8rem; color:{COLORS['text_secondary']}; margin-top:0.4rem;">Mkt Cap: {mktcap_str}</div>
+    </div>
+  </div>
+</div>
+    """).strip(), unsafe_allow_html=True)
 
 
 # ─── Key Stats Grid ───────────────────────────────────────────────────────────
