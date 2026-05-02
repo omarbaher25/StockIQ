@@ -27,29 +27,29 @@ st.set_page_config(
 
 # ── Internal imports ──────────────────────────────────────────────────────────
 from config import EXCHANGE_SUFFIXES, COLORS
-from ui.theme import inject_theme
-from data.fetcher import (
+from theme import inject_theme
+from fetcher import (
     fetch_company_info, fetch_stock_data, fetch_news_headlines, fetch_financials,
     fetch_risk_free_rate, fetch_macro_data, fetch_global_market_news, fetch_bond_data
 )
-from ui.components import (
+from components import (
     render_header, render_key_stats, render_candlestick, render_technical_chart,
     render_manipulation_gauge, render_anomaly_timeline, render_sentiment_bar,
     render_fundamental_table, render_technical_signals, render_metadata_panel,
     render_feature_importance, render_news_feed, render_valuation_dashboard,
     render_macro_panel, render_global_market_dashboard,
 )
-from data.validator import validate_ohlcv, validate_company_info
-from data.cache import cache_key, get_cached, set_cached
-from analysis.fundamental import run_fundamental_analysis
-from analysis.technical import run_technical_analysis
-from analysis.sentiment import run_sentiment_analysis
-from analysis.metadata import run_metadata_analysis
-from analysis.valuation import run_valuation_analysis
-from analysis.macro import run_macro_analysis
-from ml.anomaly_detector import run_anomaly_detection
-from ml.manipulation_scorer import run_manipulation_scoring
-from ml.explainer import generate_explanation
+from validator import validate_ohlcv, validate_company_info
+from cache import cache_key, get_cached, set_cached
+from fundamental import run_fundamental_analysis
+from technical import run_technical_analysis
+from sentiment import run_sentiment_analysis
+from metadata import run_metadata_analysis
+from valuation import run_valuation_analysis
+from macro import run_macro_analysis
+from anomaly_detector import run_anomaly_detection
+from manipulation_scorer import run_manipulation_scoring
+from explainer import generate_explanation
 
 inject_theme()
 
