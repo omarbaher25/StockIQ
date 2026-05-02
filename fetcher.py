@@ -129,7 +129,25 @@ def fetch_company_info(ticker: str) -> dict:
                 "peg_ratio": info.get("pegRatio"),
             })
 
-        # Fallback for current price if missing (history is usually not rate limited same as info)
+        # Level 2 Fallback: fast_info (often not rate-limited when .info is)
+        try:
+            fi = t.fast_info
+            if not data.get("current_price"):
+                data["current_price"] = fi.get("last_price")
+            if not data.get("market_cap"):
+                data["market_cap"] = fi.get("market_cap")
+            if not data.get("currency"):
+                data["currency"] = fi.get("currency", "USD")
+            if not data.get("52w_high"):
+                data["52w_high"] = fi.get("year_high")
+            if not data.get("52w_low"):
+                data["52w_low"] = fi.get("year_low")
+            if not data.get("previous_close") and fi.get("previous_close"):
+                data["previous_close"] = fi.get("previous_close")
+        except:
+            pass
+
+        # Level 3 Fallback: history for current price
         if not data.get("current_price"):
             try:
                 hist = t.history(period="1d")
