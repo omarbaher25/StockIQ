@@ -10,7 +10,7 @@ from plotly.subplots import make_subplots
 import pandas as pd
 import numpy as np
 from config import COLORS, RISK_COLORS
-from data.web_scraper import get_market_hub_links
+from web_scraper import get_market_hub_links
 
 _PLOT_LAYOUT = dict(
     paper_bgcolor="rgba(0,0,0,0)",
