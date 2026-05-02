@@ -128,7 +128,11 @@ def run_analysis(ticker: str, period: str, custom_text: str) -> dict:
     try:
         df = fetch_stock_data(ticker, period=period)
     except Exception as e:
-        st.error(f"❌ Could not fetch price data: {e}")
+        err_msg = str(e)
+        if "Too Many Requests" in err_msg or "429" in err_msg:
+            st.error("❌ Yahoo Finance is temporarily rate-limiting requests from this server. Please wait a few minutes and try again.")
+        else:
+            st.error(f"❌ Could not fetch price data: {err_msg}")
         return {}
     val_ohlcv = validate_ohlcv(df)
     if not val_ohlcv.ok:
