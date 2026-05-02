@@ -57,7 +57,7 @@ def render_header(info: dict):
         </div>
         <div style="text-align:right;">
           <div style="font-size:2.2rem; font-weight:800; color:{COLORS['text_primary']};">{currency} {f"{price:,.2f}" if price else "N/A"}</div>
-          <div style="font-size:1rem; color:{change_color}; font-weight:600;">{change_arrow} {abs(pct_change):.2f}% today</div>
+          <div style="font-size:1rem; color:{change_color}; font-weight:600;">{change_arrow} {abs(pct_change) if pct_change is not None else 0.00:.2f}% today</div>
           <div style="font-size:0.8rem; color:{COLORS['text_secondary']}; margin-top:0.4rem;">Mkt Cap: {mktcap_str}</div>
         </div>
       </div>
