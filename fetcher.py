@@ -15,7 +15,7 @@ import requests
 import re
 
 from config import DEFAULT_PERIOD, DEFAULT_INTERVAL, GLOBAL_NEWS_FEEDS, BOND_TICKERS
-from data.web_scraper import fetch_google_news_rss, fetch_mubasher_news
+from web_scraper import fetch_google_news_rss, fetch_mubasher_news
 
 logger = logging.getLogger(__name__)
 
