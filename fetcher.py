@@ -68,60 +68,85 @@ def fetch_macro_data(country: str) -> dict:
 def fetch_company_info(ticker: str) -> dict:
     """
     Return company metadata dict from yfinance.
-    Keys: longName, sector, industry, country, marketCap, employees,
-          website, summary, currency, exchange, logo_url
+    With robust error handling for rate limits and price fallbacks.
     """
+    data = {"ticker": ticker.upper(), "name": ticker.upper()}
     try:
         t = yf.Ticker(ticker)
-        info = t.info
-        return {
-            "ticker": ticker.upper(),
-            "name": info.get("longName") or info.get("shortName", ticker.upper()),
-            "sector": info.get("sector", "N/A"),
-            "industry": info.get("industry", "N/A"),
-            "country": info.get("country", "N/A"),
-            "exchange": info.get("exchange", "N/A"),
-            "currency": info.get("currency", "USD"),
-            "market_cap": info.get("marketCap"),
-            "employees": info.get("fullTimeEmployees"),
-            "website": info.get("website", ""),
-            "summary": info.get("longBusinessSummary", ""),
-            "logo_url": info.get("logo_url", ""),
-            # Valuation quick-access
-            "current_price": info.get("currentPrice") or info.get("regularMarketPrice"),
-            "previous_close": info.get("previousClose"),
-            "52w_high": info.get("fiftyTwoWeekHigh"),
-            "52w_low": info.get("fiftyTwoWeekLow"),
-            "beta": info.get("beta"),
-            "trailing_pe": info.get("trailingPE"),
-            "forward_pe": info.get("forwardPE"),
-            "dividend_yield": info.get("dividendYield"),
-            "eps": info.get("trailingEps"),
-            "book_value": info.get("bookValue"),
-            "price_to_book": info.get("priceToBook"),
-            "enterprise_value": info.get("enterpriseValue"),
-            "profit_margin": info.get("profitMargins"),
-            "operating_margin": info.get("operatingMargins"),
-            "revenue_growth": info.get("revenueGrowth"),
-            "earnings_growth": info.get("earningsGrowth"),
-            "return_on_equity": info.get("returnOnEquity"),
-            "return_on_assets": info.get("returnOnAssets"),
-            "debt_to_equity": info.get("debtToEquity"),
-            "current_ratio": info.get("currentRatio"),
-            "quick_ratio": info.get("quickRatio"),
-            "gross_margins": info.get("grossMargins"),
-            "ebitda_margins": info.get("ebitdaMargins"),
-            "free_cashflow": info.get("freeCashflow"),
-            "operating_cashflow": info.get("operatingCashflow"),
-            "recommendation": info.get("recommendationKey", "N/A"),
-            "analyst_target": info.get("targetMeanPrice"),
-            "shares_outstanding": info.get("sharesOutstanding"),
-            "float_shares": info.get("floatShares"),
-            "short_ratio": info.get("shortRatio"),
-            "peg_ratio": info.get("pegRatio"),
-        }
+        # Try to get info (most likely to be rate limited)
+        info = {}
+        try:
+            info = t.info
+        except Exception as e:
+            if "Too Many Requests" in str(e) or "429" in str(e):
+                logger.warning(f"Rate limited on .info for {ticker}")
+                data["error_type"] = "rate_limit"
+            else:
+                logger.error(f"t.info error: {e}")
+        
+        if info and isinstance(info, dict):
+            data.update({
+                "name": info.get("longName") or info.get("shortName", ticker.upper()),
+                "sector": info.get("sector", "N/A"),
+                "industry": info.get("industry", "N/A"),
+                "country": info.get("country", "N/A"),
+                "exchange": info.get("exchange", "N/A"),
+                "currency": info.get("currency", "USD"),
+                "market_cap": info.get("marketCap"),
+                "employees": info.get("fullTimeEmployees"),
+                "website": info.get("website", ""),
+                "summary": info.get("longBusinessSummary", ""),
+                "current_price": info.get("currentPrice") or info.get("regularMarketPrice"),
+                "previous_close": info.get("previousClose"),
+                "52w_high": info.get("fiftyTwoWeekHigh"),
+                "52w_low": info.get("fiftyTwoWeekLow"),
+                "beta": info.get("beta"),
+                "trailing_pe": info.get("trailingPE"),
+                "forward_pe": info.get("forwardPE"),
+                "dividend_yield": info.get("dividendYield"),
+                "eps": info.get("trailingEps"),
+                "book_value": info.get("bookValue"),
+                "price_to_book": info.get("priceToBook"),
+                "enterprise_value": info.get("enterpriseValue"),
+                "profit_margin": info.get("profitMargins"),
+                "operating_margin": info.get("operatingMargins"),
+                "revenue_growth": info.get("revenueGrowth"),
+                "earnings_growth": info.get("earningsGrowth"),
+                "return_on_equity": info.get("returnOnEquity"),
+                "return_on_assets": info.get("returnOnAssets"),
+                "debt_to_equity": info.get("debtToEquity"),
+                "current_ratio": info.get("currentRatio"),
+                "quick_ratio": info.get("quickRatio"),
+                "gross_margins": info.get("grossMargins"),
+                "ebitda_margins": info.get("ebitdaMargins"),
+                "free_cashflow": info.get("freeCashflow"),
+                "operating_cashflow": info.get("operatingCashflow"),
+                "recommendation": info.get("recommendationKey", "N/A"),
+                "analyst_target": info.get("targetMeanPrice"),
+                "shares_outstanding": info.get("sharesOutstanding"),
+                "float_shares": info.get("floatShares"),
+                "short_ratio": info.get("shortRatio"),
+                "peg_ratio": info.get("pegRatio"),
+            })
+
+        # Fallback for current price if missing (history is usually not rate limited same as info)
+        if not data.get("current_price"):
+            try:
+                hist = t.history(period="1d")
+                if not hist.empty:
+                    data["current_price"] = hist["Close"].iloc[-1]
+                    if not data.get("previous_close") and len(hist) > 1:
+                        data["previous_close"] = hist["Close"].iloc[-2]
+            except:
+                pass
+        
+        if "error_type" in data and not data.get("current_price"):
+             data["error"] = "Too Many Requests. Yahoo Finance has temporarily rate-limited this server. Please try again in a few minutes or try a different ticker."
+             
+        return data
+
     except Exception as e:
-        logger.error(f"fetch_company_info error for {ticker}: {e}")
+        logger.error(f"fetch_company_info critical error for {ticker}: {e}")
         return {"ticker": ticker.upper(), "name": ticker.upper(), "error": str(e)}
 
 
