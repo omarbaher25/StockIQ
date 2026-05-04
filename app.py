@@ -12,7 +12,13 @@ import streamlit as st
 import pandas as pd
 
 # ── Path setup ────────────────────────────────────────────────────────────────
-sys.path.insert(0, os.path.dirname(__file__))
+base_path = os.path.abspath(os.path.dirname(__file__))
+if base_path not in sys.path:
+    sys.path.insert(0, base_path)
+for sub in ["ui", "data", "analysis", "ml"]:
+    sub_path = os.path.join(base_path, sub)
+    if sub_path not in sys.path:
+        sys.path.insert(0, sub_path)
 
 # ── Configure logging ─────────────────────────────────────────────────────────
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
